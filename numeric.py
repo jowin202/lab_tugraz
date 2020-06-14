@@ -2,6 +2,7 @@ import time
 import csv
 import matplotlib.pyplot as plt
 from statistics import mean
+from math import pi
 
 
 def PolygonArea(x, y):
@@ -53,6 +54,36 @@ def read_druck_volumen_from_file(filename):
     
     return druck, vol
 
+
+
+
+def read_freq_from_file(filename):
+    with open(filename) as csv_file:
+        reader = csv.reader(csv_file, delimiter=';')
+        header_row = next(reader)
+
+
+        #for index, column_header in enumerate(header_row):
+        #    print(index, column_header)
+            
+        
+        freq = []
+        freq2 = []
+        
+        
+        count = 0
+        for row in reader:
+            if row[5] != '':
+                freq += [float(row[1].replace(',', '.'))]
+                freq2 += [float(row[5].replace(',', '.'))]
+            count += 1
+            if count == 30:
+                break
+    
+    return freq,freq2
+
+
+
 def CalcAreaTimeSeries(p, V):
     maxima = findMax(p)
     
@@ -87,6 +118,8 @@ plt.title("Stirlingmotor unbelastet")
 plt.plot(druck_un)
 plt.plot(vol_un)
 plt.legend(["Druck", "Volumen"])
+plt.xlabel("Zeit / ms")
+plt.ylabel("Druck / hPa bzw. Volumen / cm3")
 plt.savefig("graphics/graphs_unbelastet.png")
 plt.close()
 
@@ -95,6 +128,8 @@ plt.title("Stirlingmotor belastet")
 plt.plot(druck_be)
 plt.plot(vol_be)
 plt.legend(["Druck", "Volumen"])
+plt.xlabel("Zeit / ms")
+plt.ylabel("Druck / hPa bzw. Volumen / cm3") 
 plt.savefig("graphics/graphs_belastet.png")
 plt.close()
     
@@ -103,6 +138,8 @@ plt.close()
 plt.title("pV Diagramm")
 plt.plot(vol_un, druck_un)
 plt.plot(vol_be, druck_be)
+plt.xlabel("Volumen / cm3")
+plt.ylabel("Druck / hPa bzw Volumen / cm3")
 plt.legend(["unbelastet", "belastet"])
 plt.savefig("graphics/pV.png")
 plt.close()
@@ -183,3 +220,43 @@ print("P belastet: " + str(rho_w * c * T_be * dVpdt))
 print("Unsicherheit unbelastet: " + str( rho_w * c * ( Delta_Temp *  V_W/t_W + T_un * Delta_Vol/t_W + T_un * V_W / t_W**2 * Delta_time  )))
 print("Unsicherheit belastet: " + str( rho_w * c * ( Delta_Temp *  V_W/t_W  + T_be * Delta_Vol/t_W + T_be * V_W / t_W**2 * Delta_time  )))
 
+
+
+
+
+
+
+
+
+
+
+
+#frequenzspektrum
+freq_un,freq_un2 = read_freq_from_file("unbelastet.csv")
+freq_be,freq_be2 = read_freq_from_file("belastet.csv")
+
+
+
+
+plt.title("Frequenzspektrum")
+plt.plot(freq_un, freq_un2)
+plt.plot(freq_be, freq_be2)
+plt.ylabel("Volumen / cm3")
+plt.xlabel("Frequenz / Hz")
+plt.legend(["unbelastet", "belastet"])
+plt.savefig("graphics/freq.png")
+plt.close()
+
+
+
+
+print("")
+print("")
+print("")
+
+
+print("Drehmoment:")
+print("")
+
+print("P mech: " + str(0.55 * 0.25 * 2*pi/mean_cycl_be))
+print("Delta P mech: " + str( (0.05 * 0.25 + 0.55 * 0.001)/mean_cycl_be + 0.55*0.25/mean_cycl_be**2 * 0.002))
